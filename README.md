@@ -7,4 +7,6 @@
 
 >Save File
 
-***Contact [Our Email](olawoleolaniran@gmail.com) for help or issues***
+***Contact olawoleolaniran@gmail.com for help or issues***
+
+Enjoy [The Game](WOW.py)
