@@ -6,3 +6,5 @@
 >Fast paced CLI game
 
 >Save File
+
+*Contact olawoleolaniran@gmail.com for help or issues
