@@ -22,7 +22,7 @@ def STRATEGY(method, team_list):
 		team_list=dict(MXD)
 	return team_list
 def SPY(team_list,host,opp_team):
-	team_list[host]=(team_list.get(host)-((70/100)*(team_list.get(host))))
+	team_list[host]=(team_list.get(host)-((20/100)*(team_list.get(host))))
 	print("*****OPPOSITION*TEAM*****")
 	for i,j in opp_team.items():
 		print(f"Soldier: {i} ** Strength percentage: {j}")
@@ -46,7 +46,7 @@ def FILEOPEN(file,value=0,mode='R_F'):
 def OPP_UPGRADE(percentage,host,team):
 	team[host]=(team.get(host)+(percentage/100 *(team.get(host))))
 	return team
-def COMMAND(commander_name,opp_list,opp_no,team_list,team,team_name):
+def COMMAND(commander_name,opp_list,opp_no,team_list,team,team_name,amount):
 	print(f"{commander_name}: Shit what's all this")
 	import time
 	time.sleep(0.5)
@@ -93,17 +93,17 @@ BMr:Good, commander we also eliminated the attempted siege
 		if att.lower() in attacks:
 			if att.lower()=='punch':
 				import random
-				aa=random.randint(0,20)
+				aa=random.randint(0,35)
 				b=random.choice(list(opp_list.keys()))
 				opp_list[b]-=aa
 			elif att.lower()=='kick':
 				import random
-				aa=random.randint(0,15)
+				aa=random.randint(0,35)
 				b=random.choice(list(opp_list.keys()))
 				opp_list[b]-=aa
 			elif att.lower()=='shoot':
 				import random
-				aa=random.randint(10,50)
+				aa=random.randint(10,70)
 				b=random.choice(list(opp_list.keys()))
 				opp_list[b]-=aa
 			print("Life:",life)
@@ -124,7 +124,7 @@ BMr:Good, commander we also eliminated the attempted siege
 		life-=impact
 		print("Life:",life)
 		
-	SAVE_FILE(pos,team,commander_name,team_name)
+	SAVE_FILE(pos,team,commander_name,team_name,amount)
 	FILEOPEN("gamefile.dat",'W_F')
 def OPP_DEL(opplist):
 	for key in opplist.keys():
@@ -132,7 +132,7 @@ def OPP_DEL(opplist):
 			opplist.pop(key)
 			break
 	return opplist
-def SAVE_FILE(pos, team_list,commander,team):
+def SAVE_FILE(pos, team_list,commander,team, amount):
 	file=open("gamefile.dat","a")
 	import time,random,json
 	date=time.asctime()
@@ -149,6 +149,8 @@ def SAVE_FILE(pos, team_list,commander,team):
 	players = open("players.dat", "w")
 	json.dump (team_list, players)
 	players.close ()
+	money_file = open("money.dat", "w")
+	json.dump(amount, money_file)
 def SEP(content):
 	nos='1234567890'
 	nos=list(nos)
@@ -189,12 +191,22 @@ def GET_TEAM():
 		players = open("players.dat")
 		sol_list = json.load(players)
 	return sol_list
-def OPP_GET_TEAM():
+def GET_MONEY():
+	import json
+	money_file = open("money.dat")
+	amount = json.load(money_file)
+	return amount
+def OPP_GET_TEAM(team_list):
 	import random
 	sol_list={}
 	soldiers=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V',"W",'X','Y','Z']
-	for sol in soldiers:
-		sol_list[sol]=random.randint(0,100)
+	try:
+		for sol in soldiers:
+			sol_list[sol]=random.randint(0,round(max(team_list.values())))
+	except ValueError:
+		sol_list.clear()
+		for sol in soldiers:
+			sol_list[sol]=random.randint(0,100)
 	return sol_list
 def MAIN():
 	import time
@@ -211,49 +223,48 @@ def MAIN():
 	time.sleep(0.5)
 	print("Click Enter to start, Press 'E' to End")
 	Input=input()
-	opp_team=OPP_GET_TEAM()
+	money = GET_MONEY()
 	if Input.lower()=='e':
 		exit()
 	if Input.lower() != 'e' and Input.lower() != '':
 		print("Wrong Input")
 	team=GET_TEAM()
+	opp_team=OPP_GET_TEAM(team)
 	Commander=input("Your name pls:")
 	Team=input("Your Team name pls:")
 	WELCOME(Commander,Team)
 	time.sleep(0.7)
 	print('Team:',team)
-	start = time.time ()
-	while (round(time.time() - start)) < 360:
-		upgrade_option=input("LIST\n[1].Upgrade team\n[2].Pick strategy\n[3]Spy on opponent\n[4]Recruit soldiers.\n[end] to End.\nInput the no. in front of it to use it\n")
-		print(10-round(time.time()-start), "seconds left")
-		if upgrade_option=="1":
+	while True:
+		print(f"You have ${money} left")
+		upgrade_option=input("LIST\n[1].Upgrade team($20)\n[2].Pick strategy\n[3]Spy on opponent($50)\n[4]Recruit soldiers($30).\n[end] to End.\nInput the things in bracket in front of it to use it\n")
+		if upgrade_option=="1" and money>=20:
+			money -= 20
 			method=input("""Method:
 [M]orale
-[W]ar
 [F]ood and Water
 [C]arnal pleasures
 [Mi]ndset
 """)
 			if method.upper()=='M':
 				host=input("Which soldier:")
-				team=UPGRADE('supply',team,15,host)
+				team=UPGRADE('supply',team,30,host)
 				print(team)
 			elif method.upper()=='F':
 				host=input("Which soldier:")
-				team=UPGRADE('food and water',team,20,host)
+				team=UPGRADE('food and water',team,50,host)
 				print(team)
 			elif method.upper()=='C':
 				host=input("Which soldier:")
-				team=UPGRADE('carnal pleasures',team,-5,host)
+				team=UPGRADE('carnal pleasures',team,-10,host)
 				print(team)
 			elif method.upper()=='MI':
 				host=input("Which soldier:")
-				team=UPGRADE('mindset',team,10,host)
+				team=UPGRADE('mindset',team,20,host)
 				print(team)
 			else:
 				print("Wrong Method Input")
 				print(team)
-			print(10-round(time.time()-start), "seconds left")
 		elif upgrade_option=='2':
 			print("""Which Method:
 1:[WTS]Weak To Strong
@@ -268,9 +279,9 @@ def MAIN():
 				team=STRATEGY('MXD',team)
 			else:
 				print("Wrong Strategy\n")
-			print(10-round(time.time()-start), "seconds left")
 			print('Team code:',team)
-		elif upgrade_option=='3':
+		elif upgrade_option=='3' and money>=50:
+			money -= 50
 			print("""Please note this will reduce the energy points from the host
 Press Enter to continue or press another key to terminate""")
 			Input=input()
@@ -284,17 +295,15 @@ Press Enter to continue or press another key to terminate""")
 			else:
 				pass
 			print('Team code:',team)
-			print(10-round(time.time()-start), "seconds left")
-		elif upgrade_option=='4':
+		elif upgrade_option=='4' and money>=30:
+			money-=30
 			host=input('Soldier Name:')
 			team=CREATE(team,host)
 			print('Team code:',team)
-			print(10-round(time.time()-start), "seconds left")
 		elif upgrade_option.lower()=='full':
 			for soldiers,prowess in team.items():
 				team[soldiers]=100
 			print("Team code:",team)
-			print(10-round(time.time()-start), "seconds left")
 		elif upgrade_option.lower()=="end":
 			break
 		else:
@@ -308,10 +317,14 @@ Press Enter to continue or press another key to terminate""")
 	print("MESSAGE FROM BMr:Commander we have started the war")
 	done=False
 	while not done:
-		pp=iter(team.items())
-		p=next(pp)
-		i=list(p)
-		p=i[0]
+		try:
+			pp=iter(team.items())
+			p=next(pp)
+			i=list(p)
+			p=i[0]
+		except:
+			COMMAND(Commander,opp_team,len(opp_team.keys()),team,team,Team,money+100)
+			break
 		o=random.choice(list(opp_team.keys()))
 		if team.get(p)>opp_team.get(o):
 			time.sleep(1)
@@ -338,14 +351,14 @@ Press Enter to continue or press another key to terminate""")
 				print("You lost in the war")
 				time.sleep(1)
 				print("\n BMr: Attention commander, I...I'm sorry but we lost\n{}: I know. PCC told me\n BMr: Oh...Uhmmm Commander, pls protect the border\n{}: Sure (mutters) Useless bunch of people".format(Commander,Commander))
-				COMMAND(Commander,opp_team,len(opp_team.keys()),team,team,Team)
+				COMMAND(Commander,opp_team,len(opp_team.keys()),team,team,Team,money+100)
 			elif len(list(team.items()))>0 and len(opp_team.keys())==0:
 				print("We won let's proceed")
 				time.sleep(1)
 				print("BMr: We're proceeding boss\n{}: GO".format(Commander))
 				time.sleep(5)
 				print("We won {} \n BMr:VICTORY IS OURS\nGame Over".format(Commander))
-				SAVE_FILE('won',team,Commander,Team)
+				SAVE_FILE('won',team,Commander,Team,money+300)
 			else:
 				print("Both sides suffered losses")
 				time.sleep(1)
